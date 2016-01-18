@@ -1,0 +1,257 @@
+<html>
+
+<head>
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/font-style.css" rel="stylesheet">
+    <link href="assets/css/flexslider.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	
+    <!-- DATA TABLE CSS -->
+    <link href="assets/css/table.css" rel="stylesheet">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+ 
+  	<!-- Google Fonts call. Font Used Open Sans -->
+  	<link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+  	<!-- DataTables Initialization -->
+    <script type="text/javascript" src="assets/js/datatables/jquery.dataTables.js"></script>
+  			<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$('#dt1').dataTable();
+			} );
+	</script>
+
+    
+
+	<script type="text/javascript">
+// Set up everything when the page had finished loading
+	function zeroPad(input) {
+		if (input < 10) return "0" + input.toString();
+		return input.toString();
+	}
+	
+	function timeDecimalToHMS(inputTime){
+		hours = Math.floor(inputTime);
+		inputTime-=hours;
+		minutes = Math.floor(inputTime*60);
+		inputTime = inputTime*60 - minutes;
+		seconds = Math.floor(inputTime*60);
+		timeString = zeroPad(hours) + ":" + zeroPad(minutes) + ":" + zeroPad(seconds);
+		return timeString;
+	}
+	
+	function decimalPlaces(value, places) {
+		multiplier = Math.pow(10, places);
+		return Math.round(value*multiplier) / multiplier;
+	}
+	
+	function julianDate(now) {
+	   return (now.valueOf()/86400000) + 2440587.5;
+	}
+	
+	function frac(X) {
+	   var X = X - Math.floor(X);
+	   if ( X < 0 ) X += 1.0;
+	   return X;		
+	}
+
+	function GM_Sidereal_Time(jd) {	
+	   MJD = jd - 2400000.5;		
+	   MJD0 = Math.floor(MJD);
+	   ut = (MJD - MJD0)*24.0;		
+	   t_eph = (MJD0-51544.5)/36525.0;			
+	   gmst =  6.697374558 + 1.0027379093*ut
+	            + (8640184.812866 + (0.093104 - 0.0000062*t_eph)*t_eph)*t_eph/3600.0;		
+	   while ( gmst > 24 ) { gmst -= 24 }
+	   return gmst;
+	}
+	
+	function LM_Sidereal_Time(jd, longitude) {
+	   return 24.0*frac((GM_Sidereal_Time(jd) + longitude/15.0)/24.0);
+	}
+
+	function formatUTCTime(date) {
+		var hours;
+		var minutes;
+		var seconds;
+		var timeString;
+	
+		hours = date.getUTCHours();
+	 	minutes = date.getUTCMinutes();
+		seconds = date.getUTCSeconds();
+		
+		timeString = zeroPad(hours) + ":" + zeroPad(minutes) + ":" + zeroPad(seconds);
+		return timeString;
+	}
+	
+	function formatTime(date) {
+		var hours;
+		var minutes;
+		var seconds;
+		var timeString;
+	
+		hours = date.getHours();
+	 	minutes = date.getMinutes();
+		seconds = date.getSeconds();
+
+		timeString = zeroPad(hours) + ":" + zeroPad(minutes) + ":" + zeroPad(seconds);
+		return timeString;
+	}
+
+window.addEventListener("load", eventWindowLoaded, false);
+
+var logDate = "20160109";
+
+function eventWindowLoaded() {
+    $.getJSON("20160109.json", jsonReady);
+	$("#observingLogDate").text(logDate);
+	timerID = setInterval(clockTicker, 1000);
+	jsonRefreshID = setInterval(jsonRefresh, 5000);
+}
+
+function clockTicker() {
+	now = new Date();
+	localTimeString = formatTime(now) + " (" + now.toString().match(/\(([A-Za-z\s].*)\)/)[1] + ")";
+	
+	jd = julianDate(now);
+	// GMSiderealTime = GM_Sidereal_Time(jd);
+	LMSiderealTime = LM_Sidereal_Time(jd, -17.885);
+	
+	$('#julianDate').text( decimalPlaces(jd, 6));
+	$('#currentUTCTime').text(formatUTCTime(now));
+	$('#siderealTime').text(timeDecimalToHMS(LMSiderealTime));
+	
+}
+
+function jsonRefresh() {
+    $.getJSON("20160109.json", jsonReady);
+}
+
+function jsonReady(fileContents) {
+	targets = fileContents
+	for (i in targets) {
+		console.log(i + " : ");
+		console.log(targets[i]) 
+	}
+	insertObservingLogRows(targets);
+	// $("#changeme").text("new value");
+	
+}
+
+function insertObservingLogRows(targets) {
+	tableHTML = "";
+	// Sort targets in date order... using the MJD value
+	targets.sort(function(a,b) {return(a.startMJD - b.startMJD)});
+	for (i in targets) {
+		tableHTML+= "<tr class='" 
+		tableHTML+= (i % 2) ? "odd" : "even";
+		tableHTML+=  "'>";
+		tableHTML+= "<td>" + targets[i].name + "</td>";
+		tableHTML+= "<td>" + targets[i].targetRA + "</td>";
+		tableHTML+= "<td>" + targets[i].targetDEC + "</td>";
+		tableHTML+= "<td>" + targets[i].startObservationUTC + "</td>";
+		tableHTML+= "<td>" + targets[i].endObservationUTC + "</td>";
+		tableHTML+= "<td>" + Math.round(targets[i].durationMinutes) + "</td>";
+		tableHTML+= "<td>" + targets[i].numFrames + "</td>";
+		tableHTML+= "<td>" + targets[i].exposureTime + "</td>";
+		tableHTML+= "<td>" + Math.round(targets[i].estimatedReadoutTime*10)/10 + "</td>";
+		tableHTML+= "<td>(" + targets[i].xbin + "x" + targets[i].ybin + ")</td>";
+		
+		tableHTML+= "</tr>";
+	}
+	
+		console.log(tableHTML);
+	$("#observingLogTable").html(tableHTML);
+}
+
+</script>
+
+</head>
+<body>
+<h1>AUTO logger on SAFT</h1>
+<!--    <div class="container"> -->
+<div class="container">
+	<div class="row">
+        <div class="col-sm-3 col-lg-3">
+
+      <!-- LOCAL TIME BLOCK -->
+      		<div class="half-unit">
+	      		<dtitle>UTC</dtitle>
+	      		<hr>
+		      		<div class="clockcenter">
+			      		<digiclock><span id="currentUTCTime">12:45:56</span></digiclock>
+		      		</div>
+			</div>
+		</div>
+		<div class="col-sm-3 col-lg-3">
+  			<div class="half-unit">
+      			<dtitle>LST</dtitle>
+      			<hr>
+	      			<div class="clockcenter">
+		      			<digiclock><span id="siderealTime">12:45:56</span></digiclock>
+	      			</div>
+			</div>
+		</div>
+		<div class="col-sm-3 col-lg-3">
+  			<div class="half-unit">
+      			<dtitle>JD</dtitle>
+      			<hr>
+	      			<div class="clockcenter">
+		      			<digiclock><span id="julianDate">0.0</span></digiclock>
+	      			</div>
+			</div>
+		</div>
+ 		
+		<div class="col-sm-3 col-lg-3">
+  			<div class="dash-unit">
+      			<dtitle>Weather</dtitle>
+      			<hr>
+				<div class="cont">
+					<p class="glyphicon glyphicon-ok"> Status</p><br/>
+					<p class="glyphicon">Temperature | 7.8 &#x2103;</p>
+					<p class='glyphicon glyphicon-menu-up'> Pressure | 775.1 hPa</p>
+					<p class='glyphicon'>Wind direction | 351.0 &deg;</p>
+					<p class='glyphicon glyphicon-ok-sign'> Wind speed | 7.6 km/h</p>
+					<p class='glyphicon glyphicon-ok-sign'> Rel. humidity | 51 %</p>
+				</div>
+			</div>
+		</div>
+
+	</div>
+      <!-- CONTENT -->
+		<div class="col-sm-12 col-lg-12">
+			<h4><strong>Observing Log: <span id="observingLogDate"></span></strong></h4>
+			  <table class="display">
+	          <thead>
+	            <tr>
+	              <th>Target</th>
+	              <th>RA</th>
+	              <th>DEC</th>
+	              <th>Start</th>
+	              <th>End</th>
+				  <th>Duration (m)</th>
+				  <th>Frames</th>
+				  <th>Exposure (s)</th>
+				  <th>Readout (s)</th>
+				  <th>Binning</th>
+				  
+	            </tr>
+	          </thead>
+	          <tbody id="observingLogTable">
+	            <tr class="odd">
+	              <td>..loading..</td>
+	              <td>..loading..</td>
+	              <td>..loading..</td>
+	              <td class="center">..loading..</td>
+	              <td class="center">..loading..</td>
+	            </tr>
+	          </tbody>
+	         </table><!--/END First Table -->
+		</div>
+	</div>
+</div>
+</body>
+</html>
