@@ -121,9 +121,10 @@ function clockTicker() {
 	// GMSiderealTime = GM_Sidereal_Time(jd);
 	LMSiderealTime = LM_Sidereal_Time(jd, -17.885);
 	
-	$('#julianDate').text( decimalPlaces(jd, 6));
+	$('#julianDate').text(decimalPlaces(jd, 6));
 	$('#currentUTCTime').text(formatUTCTime(now));
 	$('#siderealTime').text(timeDecimalToHMS(LMSiderealTime));
+	$('#modifiedJulianDate').text(decimalPlaces(jd - 2400000.5, 6));
 	
 }
 
@@ -195,9 +196,7 @@ function insertObservingLogRows(targets) {
 			      		<digiclock><span id="currentUTCTime">12:45:56</span></digiclock>
 		      		</div>
 			</div>
-		</div>
-		<div class="col-sm-3 col-lg-3">
-  			<div class="half-unit">
+			<div class="half-unit">
       			<dtitle>LST</dtitle>
       			<hr>
 	      			<div class="clockcenter">
@@ -213,24 +212,52 @@ function insertObservingLogRows(targets) {
 		      			<digiclock><span id="julianDate">0.0</span></digiclock>
 	      			</div>
 			</div>
+			<div class="half-unit">
+      			<dtitle>MJD</dtitle>
+      			<hr>
+	      			<div class="clockcenter">
+		      			<digiclock><span id="modifiedJulianDate">0.0</span></digiclock>
+	      			</div>
+			</div>
 		</div>
  		
 		<div class="col-sm-3 col-lg-3">
   			<div class="dash-unit">
       			<dtitle>Weather</dtitle>
       			<hr>
-				<div class="cont">
-					<p class="glyphicon glyphicon-ok"> Status</p><br/>
-					<p class="glyphicon">Temperature | <span id="temperature">--</span> &#x2103;</p>
-					<p class='glyphicon glyphicon-ok-sign'> Rel. humidity | <span id="relHumidity">--</span> %</p>
-					<p class='glyphicon glyphicon-menu-up'> Pressure | <span id="pressure">--</span> hPa</p>
-					<p class='glyphicon'>Wind direction | <span id="windDirection">--</span> &deg;</p>
-					<p class='glyphicon glyphicon-ok-sign'> Wind speed | <span id="windSpeed">--</span> km/h</p>
+				<div class="info-user">
+					<span aria-hidden="true" class="glyphicon glyphicon-ok"></span>
 				</div>
+				<p>&nbsp;</p>
+				<table class="display">
+					<tbody>
+						<tr class="odd">
+							<td align="right" width="50%">Temperature</td>
+							<td><span id="temperature">--</span> &#x2103;</td>
+						</tr>
+						<tr class="even">
+							<td align="right" width="50%">Rel. humidity</td>
+							<td><span id="relHumidity">--</span> %</td>
+						</tr>
+						<tr class="odd">
+							<td align="right" width="50%">Pressure</td>
+							<td><span id="pressure">--</span> hPa</td>
+						</tr>
+						<tr class="even">
+							<td align="right" width="50%">Wind direction</td>
+							<td><span id="windDirection">--</span> &deg;</td>
+						</tr>
+						<tr class="odd">
+							<td align="right" width="50%">Wind speed</td>
+							<td><span id="windSpeed">--</span> km/h</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
-
 	</div>
+
+</div>
       <!-- CONTENT -->
 		<div class="col-sm-12 col-lg-12">
 			<h4><strong>Observing Log: <span id="observingLogDate"></span></strong></h4>
