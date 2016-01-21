@@ -9,6 +9,8 @@
     <link href="assets/css/flexslider.css" rel="stylesheet">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 	
     <!-- DATA TABLE CSS -->
     <link href="assets/css/table.css" rel="stylesheet">
@@ -106,11 +108,17 @@ window.addEventListener("load", eventWindowLoaded, false);
 var logDate = "20160109";
 
 function eventWindowLoaded() {
-    $.getJSON("20160109.json", jsonReady);
+    $.getJSON(logDate + ".json", jsonReady);
 	$.getJSON("weather.json", weatherReady);
 	$("#observingLogDate").text(logDate);
 	timerID = setInterval(clockTicker, 1000);
 	jsonRefreshID = setInterval(jsonRefresh, 5000);
+	$( "#datepicker" ).datepicker({
+ 	    dateFormat: "yy-mm-dd",
+	    autoSize: true,
+		onClose: changeLogDate,  
+ 	});
+	
 }
 
 function clockTicker() {
@@ -128,8 +136,14 @@ function clockTicker() {
 	
 }
 
+function changeLogDate(dateString, object) {
+	logDate = dateString.replace(/\-/g,'');
+	$("#observingLogDate").text(logDate);
+	$.getJSON(logDate + ".json", jsonReady);
+}
+
 function jsonRefresh() {
-    $.getJSON("20160109.json", jsonReady);
+    $.getJSON(logDate + ".json", jsonReady);
 	$.getJSON("weather.json", weatherReady);
 }
 
@@ -261,6 +275,8 @@ function insertObservingLogRows(targets) {
       <!-- CONTENT -->
 		<div class="col-sm-12 col-lg-12">
 			<h4><strong>Observing Log: <span id="observingLogDate"></span></strong></h4>
+				Change date: <input type="text" id="datepicker">
+			
 			  <table class="display">
 	          <thead>
 	            <tr>
