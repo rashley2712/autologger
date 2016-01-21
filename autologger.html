@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <!-- Le styles -->
     <link href="assets/css/bootstrap.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
@@ -11,7 +12,6 @@
 	
     <!-- DATA TABLE CSS -->
     <link href="assets/css/table.css" rel="stylesheet">
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 
  
   	<!-- Google Fonts call. Font Used Open Sans -->
@@ -107,6 +107,7 @@ var logDate = "20160109";
 
 function eventWindowLoaded() {
     $.getJSON("20160109.json", jsonReady);
+	$.getJSON("weather.json", weatherReady);
 	$("#observingLogDate").text(logDate);
 	timerID = setInterval(clockTicker, 1000);
 	jsonRefreshID = setInterval(jsonRefresh, 5000);
@@ -128,6 +129,7 @@ function clockTicker() {
 
 function jsonRefresh() {
     $.getJSON("20160109.json", jsonReady);
+	$.getJSON("weather.json", weatherReady);
 }
 
 function jsonReady(fileContents) {
@@ -137,9 +139,17 @@ function jsonReady(fileContents) {
 		console.log(targets[i]) 
 	}
 	insertObservingLogRows(targets);
-	// $("#changeme").text("new value");
-	
 }
+
+function weatherReady(weatherData) {
+	console.log(weatherData);
+	$("#temperature").text(weatherData.Temperature);
+	$("#relHumidity").text(weatherData.RelativeHumidity);
+	$("#pressure").text(weatherData.Pressure);
+	$("#windSpeed").text(weatherData.WindSpeed);
+	$("#windDirection").text(weatherData.WindDirection);
+}
+
 
 function insertObservingLogRows(targets) {
 	tableHTML = "";
@@ -163,7 +173,7 @@ function insertObservingLogRows(targets) {
 		tableHTML+= "</tr>";
 	}
 	
-		console.log(tableHTML);
+		// console.log(tableHTML);
 	$("#observingLogTable").html(tableHTML);
 }
 
@@ -211,11 +221,11 @@ function insertObservingLogRows(targets) {
       			<hr>
 				<div class="cont">
 					<p class="glyphicon glyphicon-ok"> Status</p><br/>
-					<p class="glyphicon">Temperature | 7.8 &#x2103;</p>
-					<p class='glyphicon glyphicon-menu-up'> Pressure | 775.1 hPa</p>
+					<p class="glyphicon">Temperature | <span id="temperature">--</span> &#x2103;</p>
+					<p class='glyphicon glyphicon-ok-sign'> Rel. humidity | <span id="relHumidity">--</span> %</p>
+					<p class='glyphicon glyphicon-menu-up'> Pressure | <span id="pressure">--</span> hPa</p>
 					<p class='glyphicon'>Wind direction | 351.0 &deg;</p>
 					<p class='glyphicon glyphicon-ok-sign'> Wind speed | 7.6 km/h</p>
-					<p class='glyphicon glyphicon-ok-sign'> Rel. humidity | 51 %</p>
 				</div>
 			</div>
 		</div>
