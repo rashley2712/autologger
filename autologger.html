@@ -108,6 +108,7 @@ window.addEventListener("load", eventWindowLoaded, false);
 var logDate = "20160109";
 
 function eventWindowLoaded() {
+	$.ajaxSetup({ cache: false });
     $.getJSON(logDate + ".json", jsonReady);
 	$.getJSON("weather.json", weatherReady);
 	$("#observingLogDate").text(logDate);
