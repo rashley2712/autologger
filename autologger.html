@@ -146,6 +146,7 @@ function changeLogDate(dateString, object) {
 function jsonRefresh() {
     $.getJSON(logDate + ".json", jsonReady);
 	$.getJSON("weather.json", weatherReady);
+	document.getElementById("telescopeImage").src = "latestImage.png?" + new Date().getTime();
 }
 
 function jsonReady(fileContents) {
@@ -294,5 +295,7 @@ function insertObservingLogRows(targets) {
 		</div>
 	</div>
 </div>
+
+<img id="telescopeImage" src="latestImage.png">
 </body>
 </html>
